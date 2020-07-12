@@ -78,7 +78,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="constdef.h">
+    <ClInclude Include="..\include\constdef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

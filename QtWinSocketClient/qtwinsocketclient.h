@@ -16,15 +16,17 @@ public:
 
 private slots:
     void slotSend();
-    void onSpeed(qreal val);
+    void slotRecv();
+    void slotSendSpeed(qreal val);
+    void slotRecvSpeed(qreal val);
 
 private:
     void initUI();
 
 private:
-    TcpTask *mpTask;
-    QLabel *speedLabel;
-    QPushButton *sendBtn;
+    TcpTask     *m_pSendTask,*m_pRecvTask;
+    QLabel      *m_pSendSpeedLabel,*m_pRecvSpeedLabel;
+    QPushButton *m_pSendBtn,*m_pRecvBtn;
 };
 
 #endif // QTWINSOCKETCLIENT_H

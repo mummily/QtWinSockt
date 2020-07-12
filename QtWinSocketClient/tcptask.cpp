@@ -1,7 +1,7 @@
 #include "tcptask.h"
 #include <QDateTime>
 #include "tcpclient.h"
-#include "constdef.h"
+#include "..\include\constdef.h"
 
 TcpTask::TcpTask(QString addr,quint16 port,QObject *parent)
     : QThread(parent), m_nPort(port), m_sAddr(addr), m_bQuit(false)
@@ -39,7 +39,7 @@ void TcpTask::run()
     QDateTime dtCurrent = dtLast;
 
     quint64 sumsize = 0;
-    if (SOCKET_SEND_PORT == m_nPort) // 发送
+    if (CLIENT_SOCKET_SEND_PORT == m_nPort) // 发送
     {
         client.setSendBufferSize(SOCKET_SEND_BUFF);
         memset(m_buff,0xAA,sizeof(m_buff));
@@ -60,7 +60,7 @@ void TcpTask::run()
             }
         }
     }
-    else if (SOCKET_RECV_PORT == m_nPort) // 接收
+    else if (CLIENT_SOCKET_RECV_PORT == m_nPort) // 接收
     {
         client.setRecvBufferSize(SOCKET_RECV_BUFF);
         while (!m_bQuit)
