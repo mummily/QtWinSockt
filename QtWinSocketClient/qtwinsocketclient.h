@@ -2,7 +2,8 @@
 #define QTWINSOCKETCLIENT_H
 
 #include <QtWidgets/QMainWindow>
-#include "tcptask.h"
+#include "tcpsendclient.h"
+#include "tcprecvclient.h"
 
 class QLabel;
 class QPushButton;
@@ -24,7 +25,8 @@ private:
     void initUI();
 
 private:
-    TcpTask     *m_pSendTask,*m_pRecvTask;
+    TcpSendClient *m_pSendTask;
+    TcpRecvClient *m_pRecvTask;
     QLabel      *m_pSendSpeedLabel,*m_pRecvSpeedLabel;
     QPushButton *m_pSendBtn,*m_pRecvBtn;
 };

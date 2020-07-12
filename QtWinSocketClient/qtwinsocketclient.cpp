@@ -58,7 +58,7 @@ void QtWinSocketClient::slotSend()
     m_pSendBtn->setEnabled(false);
 
     QString addr = "127.0.0.1";
-    m_pSendTask = new TcpTask(addr, CLIENT_SOCKET_SEND_PORT);
+    m_pSendTask = new TcpSendClient(addr, CLIENT_SOCKET_SEND_PORT);
 
     connect(m_pSendTask,SIGNAL(speed(qreal)),this,SLOT(slotSendSpeed(qreal)),Qt::QueuedConnection);
     m_pSendTask->start();
@@ -75,7 +75,7 @@ void QtWinSocketClient::slotRecv()
     m_pRecvBtn->setEnabled(false);
 
     QString addr = "127.0.0.1";
-    m_pRecvTask = new TcpTask(addr, CLIENT_SOCKET_RECV_PORT);
+    m_pRecvTask = new TcpRecvClient(addr, CLIENT_SOCKET_RECV_PORT);
 
     connect(m_pRecvTask,SIGNAL(speed(qreal)),this,SLOT(slotRecvSpeed(qreal)),Qt::QueuedConnection);
     m_pRecvTask->start();
