@@ -4,6 +4,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QHostAddress>
+#include "constdef.h"
 
 QtWinSocketClient::QtWinSocketClient(QWidget *parent)
     : QMainWindow(parent)
@@ -16,10 +18,19 @@ QtWinSocketClient::~QtWinSocketClient()
 
 }
 
+/*****************************************************************************
+* @brief   : 初始化UI
+* @author  : wb
+* @date    : 2020/07/12
+* @param:  : 
+*****************************************************************************/
 void QtWinSocketClient::initUI()
 {
-    QLabel *addrLabel = new QLabel("Addr", this);
-    speedLabel = new QLabel("Speed", this);
+    QHostAddress addr = QHostAddress::LocalHost;
+
+    QLabel *addrLabel = new QLabel("", this);
+    addrLabel->setText("Server IP: " + addr.toString());
+    speedLabel = new QLabel("", this);
     sendBtn = new QPushButton("Send", this);
 
     QVBoxLayout *vBoxLayout = new QVBoxLayout();
@@ -34,17 +45,30 @@ void QtWinSocketClient::initUI()
     connect(sendBtn, SIGNAL(clicked()), this, SLOT(slotSend()));
 }
 
+/*****************************************************************************
+* @brief   : 发送
+* @author  : wb
+* @date    : 2020/07/12
+* @param:  : 
+*****************************************************************************/
 void QtWinSocketClient::slotSend()
 {
-    QString sAddr = "192.168.0.107";
-    mpTask = new TcpTask(sAddr, 9007);
+    sendBtn->setEnabled(false);
+
+    QHostAddress addr = QHostAddress::LocalHost;
+    mpTask = new TcpTask(addr.toString(), SOCKET_SEND_PORT);
+
     connect(mpTask,SIGNAL(speed(qreal)),this,SLOT(onSpeed(qreal)),Qt::QueuedConnection);
     mpTask->start();
-
-    sendBtn->setEnabled(false);
 }
 
+/*****************************************************************************
+* @brief   : 发送速度
+* @author  : wb
+* @date    : 2020/07/12
+* @param:  : 
+*****************************************************************************/
 void QtWinSocketClient::onSpeed(qreal val)
 {
-    speedLabel->setText(tr("%1").arg(val));
+    speedLabel->setText(tr("Speed: %1 M/s").arg(val));
 }

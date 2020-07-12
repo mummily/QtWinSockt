@@ -1,81 +1,85 @@
 #include "tcptask.h"
 #include <QDateTime>
 #include "tcpclient.h"
+#include "constdef.h"
 
-#define MAX_BUFF_SIZE (1024*1024*4); // 4M
-
-TcpTask::TcpTask(QString addr,quint16 port,QObject *parent):QThread(parent)
-    ,mPort(port)
-    ,mAddr(addr)
-    ,mQuit(false)
+TcpTask::TcpTask(QString addr,quint16 port,QObject *parent)
+    : QThread(parent), m_nPort(port), m_sAddr(addr), m_bQuit(false)
 {
-
 }
+
+/*****************************************************************************
+* @brief   : 发送|接收任务中断
+* @author  : wb
+* @date    : 2020/07/12
+* @param:  : 
+*****************************************************************************/
 void TcpTask::terminate()
 {
-    mQuit = true;
+    m_bQuit = true;
     if(this->isRunning())
         wait(3000);
 
     QThread::terminate();
 }
+
+/*****************************************************************************
+* @brief   : 任务执行
+* @author  : wb
+* @date    : 2020/07/12
+* @param:  : 
+*****************************************************************************/
 void TcpTask::run()
 {
-    int len = MAX_BUFF_SIZE;
     TcpClient client;
-    QDateTime last_tm = QDateTime::currentDateTime();
-    QDateTime curr_tm = last_tm;
-    quint64 sum_size = 0;
-    qint32 secs = 1;
-    if(client.connectToHost(mAddr.toStdString().c_str(),mPort))
+    if(!client.connectToHost(m_sAddr.toStdString().c_str(),m_nPort))
+        return;
+
+    QDateTime dtLast = QDateTime::currentDateTime();
+    QDateTime dtCurrent = dtLast;
+
+    quint64 sumsize = 0;
+    if (SOCKET_SEND_PORT == m_nPort) // 发送
     {
-        switch(mPort)
+        client.setSendBufferSize(SOCKET_SEND_BUFF);
+        memset(m_buff,0xAA,sizeof(m_buff));
+        while (!m_bQuit)
         {
-        case 9007:
-            {
-                client.setSendBufferSize(len);
-                memset(buff,0xAA,sizeof(buff));
-                while (!mQuit)
-                {
-                    int ret = client.sendData(buff,sizeof(buff));
-
-                    if(ret <= 0 )break;
-
-                    sum_size += ret;
-                    curr_tm = QDateTime::currentDateTime();
-                    secs = last_tm.secsTo(curr_tm);
-                    if(secs >= 5)
-                    {
-                        emit speed(sum_size /(secs*1024*1024));
-                        last_tm = curr_tm;
-                        sum_size = 0;
-                    }
-
-                }
+            int ret = client.sendData(m_buff,sizeof(m_buff));
+            if(ret <= 0 )
                 break;
-            }
-        case 9008:
-            {
-                client.setRecvBufferSize(len);
-                while (!mQuit)
-                {
-                    int ret = client.recvData(buff,sizeof(buff));
 
-                    if(ret <= 0 )break;
-                    sum_size += ret;
-                    curr_tm = QDateTime::currentDateTime();
-                    secs = last_tm.secsTo(curr_tm);
-                    if(secs >= 5)
-                    {
-                        emit speed(sum_size /(secs*1000*1000.0));
-                        last_tm = curr_tm;
-                        sum_size = 0;
-                    }
-                }
-                break;
+            sumsize += ret;
+            dtCurrent = QDateTime::currentDateTime();
+            qint32 secs = dtLast.secsTo(dtCurrent);
+            if(secs >= 5) //每5s算下平均速度
+            {
+                emit speed(sumsize /(secs*1024*1024));
+                dtLast = dtCurrent;
+                sumsize = 0;
             }
         }
-
-        client.close();
     }
+    else if (SOCKET_RECV_PORT == m_nPort) // 接收
+    {
+        client.setRecvBufferSize(SOCKET_RECV_BUFF);
+        while (!m_bQuit)
+        {
+            int ret = client.recvData(m_buff,sizeof(m_buff));
+            if(ret <= 0 )
+                break;
+
+            sumsize += ret;
+            dtCurrent = QDateTime::currentDateTime();
+            qint32 secs = dtLast.secsTo(dtCurrent);
+            if(secs >= 5)
+            {
+                emit speed(sumsize /(secs*1024*1024));
+                dtLast = dtCurrent;
+                sumsize = 0;
+            }
+        }
+    }
+
+    client.close();
 }

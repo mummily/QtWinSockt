@@ -21,7 +21,7 @@ public:
     void close();
 
 private:
-    SOCKET mDataSock;
+    SOCKET m_dataSock;
 };
 
 #endif // TCPCLIENT_H

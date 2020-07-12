@@ -19,10 +19,10 @@ signals:
 public slots:
 
 private:
-    quint16 mPort;
-    QString mAddr;
-    bool mQuit;
-    char buff[1048576];
+    quint16 m_nPort;
+    QString m_sAddr;
+    bool    m_bQuit;
+    char    m_buff[1048576]; // 1M
 };
 
 #endif // TCPTASK_H
